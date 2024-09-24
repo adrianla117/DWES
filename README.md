@@ -36,7 +36,7 @@ Aplicación operativa y en constante desarrollo y mejora que se centra en la ima
 
 ![image](https://github.com/user-attachments/assets/8a0dfa39-5af8-4a41-9a59-5f30c110e2a3)
 
-
+<h2>Características de la aplicación y demostración</h2>
 ## 📽️:Funcionalidades del proyecto
 
 - `Funcionalidad 1`: Posibilidad de tener un grupo cerrado de gente con privacidad para ver solo ellos tus fotos
@@ -50,3 +50,35 @@ Aplicación operativa y en constante desarrollo y mejora que se centra en la ima
 - `Funcionalidad 3`: Creación de grupos sin límite de usuarios donde podréis compartir y hablar entre vosotros
 ![image](https://github.com/user-attachments/assets/154b145d-491a-4f0c-8580-9be5fe8472fc)
 
+<h2>Acceso al proyecto</h2>
+Actualmente el proyecto es cerrado, por lo tanto el código fuente no se puede descargar de forma pública.
+🔐 Proyecto cerrado 🔐 
+
+<h2>Tecnologías utilizadas</h2>
+- Django
+
+![image](https://github.com/user-attachments/assets/14848f87-61ad-4efd-88e0-1e4872099871)
+
+- PostgreSQL
+
+![image](https://github.com/user-attachments/assets/62803a83-7e73-42a8-b032-68ac2c495fa8)
+
+- Apache solr
+
+![image](https://github.com/user-attachments/assets/77487cf6-85de-4bd7-be35-a2afc386d8cc)
+
+<h2>Personas contribuyentes</h2>
+Tenemos un equipo muy bueno y amplio en la compañía, pero debemos destacar a nuestro CEO, Adam Mosseri:
+
+![image](https://github.com/user-attachments/assets/04d912be-6b94-47c7-a9cf-e18c6bf321df)
+
+<h2>Personas desarrolladoras del proyecto</h2>
+Adrián López Alonso:
+
+![octocat-1727175122132](https://github.com/user-attachments/assets/9bb69ab4-ccf5-4c01-9400-946eb697bcaa)
+
+<h2>Licencia</h2>
+Actualmente todo el repositorio es público.
+
+<h2>Conclusión</h2>
+En definitiva, Instagram es una aplicación muy completa con la que puedes compartir fotos, hablar con tus amigos, etc. Muy intuitiva para jóvenes y mayores, aunque el target principal sea la gente entre 18-40 años. Nos preocupamos por el rendimiento y el feedback de la gente, por eso no paramos de lanzar actualizaciones cada mes para mejorar y reparar errores en ella. Cada vez hay más funcionalidades, así que la aplicación seguirá evolucionando en el futuro.
