@@ -15,6 +15,7 @@
 		echo '<h2>'.$only_row['url_imagen'].'</h2>';
 		echo '<h3>'.$only_row['genero'].'</h3>';
 		echo '<h4>'.$only_row['nota'].'</h4>';
+		echo '<h5>'.$only_row['fecha'].'</h5>';
 	?>
 	<h3>Comentarios:</h3>
 	<ul>
@@ -23,6 +24,7 @@
 			$result2 = mysqli_query($db, $query2) or die('Query error');
 			while ($row = mysqli_fetch_array($result2)) {
 				echo '<li>'.$row['comentario'].'</li>';
+				echo '<li>'.$row['fecha'].'</li>';
 			}
 			mysqli_close($db);
 		?>
