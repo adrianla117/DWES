@@ -3,10 +3,22 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Inicio de Sesión</title>
+	<script>
+		function validarFormulario() {
+			var email = document.forms["loginForm"]["email"].value;
+			var password = document.forms["loginForm"]["password"].value;
+
+			if (email === "" || password === "") {
+				alert("Por favor, complete todos los campos.");
+				return false; //así evitamos que se envíe el formulario
+			}
+			return true; //así permitimos que el formulario se envíe si todo va bien
+		}
+	</script>
 </head>
 <body>
 	<h2>Iniciar Sesión</h2>
-	<form action="login.php" method="post">
+	<form name="loginForm" action="login.php" method="post" onsubmit="return validarFormulario()">
 		<label for="email">Correo electrónico:</label>
 		<input type="email" name="email" required>
 		<br>
