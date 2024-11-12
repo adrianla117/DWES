@@ -1,4 +1,9 @@
 <?php
+	session_start();
+	if (isset($_SESSION['user'])) {
+		echo "<a href='logout.php'>Cerrar sesión</a>";
+	}
+
 	$db = mysqli_connect('localhost', 'root', '1234', 'mysitedb') or die('Fail');
 ?>
 <html>
