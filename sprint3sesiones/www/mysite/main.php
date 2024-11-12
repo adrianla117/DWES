@@ -34,6 +34,25 @@ $result = mysqli_query($db, $query) or die('Error en la consulta');
             max-width: 150px;
             height: auto;
         }
+        .fade-in {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .fade-in:hover {
+            opacity: 1;
+        }
+
+        .fade-in2 {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .fade-in2:hover {
+            opacity: 1;
+            transform: scale(1);
+        }
     </style>
 </head>
 <body>
@@ -60,11 +79,11 @@ $result = mysqli_query($db, $query) or die('Error en la consulta');
                 $nota = $row['nota'];
                 ?>
                 <tr>
-                    <td><a href="/detail.php?id=<?php echo $id; ?>"><?php echo $id; ?></a></td>
-                    <td><?php echo $nombre; ?></td>
+                    <td class="fade-in"><a href="/detail.php?id=<?php echo $id; ?>"><?php echo $id; ?></a></td>
+                    <td class ="fade-in"><?php echo $nombre; ?></td>
                     <td><img src="<?php echo $url_imagen; ?>" alt="Imagen de <?php echo $nombre; ?>"></td>
-                    <td><?php echo $genero; ?></td>
-                    <td><?php echo $nota; ?></td>
+                    <td class="fade-in"><?php echo $genero; ?></td>
+                    <td class="fade-in2"><?php echo $nota; ?></td>
                 </tr>
                 <?php
             }
