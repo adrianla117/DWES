@@ -1,7 +1,7 @@
 <?php
 	session_start();
 
-	$db = mysqli_connect('localhost', 'root', '1234', 'mysitedb') or die('Fail');
+	$db = mysqli_connect('172.16.0.2', 'root', '1234', 'mysitedb') or die('Fail');
 
 	$id_pelicula = $_POST['pelicula_id'];
 	$comentario = $_POST['new_comment'];

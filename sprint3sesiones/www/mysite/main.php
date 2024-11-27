@@ -4,7 +4,7 @@ if (isset($_SESSION['user'])) {
     echo "<a href='logout.php'>Cerrar sesión</a>";
 }
 
-$db = mysqli_connect('localhost', 'root', '1234', 'mysitedb');
+$db = mysqli_connect('172.16.0.2', 'root', '1234', 'mysitedb');
 if (!$db) {
     error_log('Connection error: ' . mysqli_connect_error());
     echo "Error en la conexión a la base de datos.";
