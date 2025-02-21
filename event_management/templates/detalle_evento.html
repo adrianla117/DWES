@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalles del Evento{% endblock %}
+
+{% block content %}
+<h2>{{ evento.title }}</h2>
+<p>{{ evento.description }}</p>
+<p>Fecha y Hora: {{ evento.date_time }}</p>
+<p>Capacidad: {{ evento.capacity }}</p>
+<p>Organizador: {{ evento.organizer.username }}</p>
+<form method="post" action="{% url 'crear_reserva' %}">
+    {% csrf_token %}
+    <input type="hidden" name="evento_id" value="{{ evento.id }}">
+    <label>Entradas:</label>
+    <input type="number" name="tickets" required>
+    <button type="submit">Reservar</button>
+</form>
+{% endblock %}

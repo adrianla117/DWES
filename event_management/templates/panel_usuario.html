@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Usuario{% endblock %}
+
+{% block content %}
+<h2>Mis Reservas</h2>
+<ul>
+    {% for reserva in reservas %}
+    <li>{{ reserva.event.title }} - {{ reserva.tickets }} entradas - Estado: {{ reserva.status }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}
