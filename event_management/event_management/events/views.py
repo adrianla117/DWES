@@ -7,10 +7,14 @@ from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from .models import User, Event, Reservation, Comment
-
-#def lista_participantes(request):
-#    participantes = User.objects.filter(role="participant")
-#    return JsonResponse(participantes, safe=False)
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework import status
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 #CRUD DE EVENTOS:
 
@@ -183,50 +187,6 @@ def eliminar_evento(request, evento_id):
 
     evento.delete()
     return JsonResponse({'message': 'Evento eliminado con éxito'}, status=200)
-
-
-#En vez de PUT/PATCH podríamos también utilizar con POST y trys:
-#def actualizar_evento(request, evento_id):
-#    if request.method == 'POST':
-#        try:
-#            evento = Event.objects.get(id=evento_id)
-#        except Event.DoesNotExist:
-#            return JsonResponse({'error': 'Evento no encontrado'}, status=404)
-#
-#        try:
-#            #toma valores de POST, asegurando que existen antes de asignar
-#            title = request.POST['title']
-#            description = request.POST['description']
-#            date_time = request.POST['date_time']
-#            capacity = request.POST['capacity']
-#            image_url = request.POST.get('image_url', evento.image_url) #mantiene el valor actual si no se envía
-#
-#            #convertimos capacidad a entero
-#            capacity = int(capacity)
-#
-#        except KeyError as e:
-#            return JsonResponse({'error': f'Falta el parámetro requerido: {str(e)}'}, status=400)
-#        
-#        except ValueError:
-#            return JsonResponse({'error': 'El campo "capacity" debe ser un número entero válido'}, status=400)
-#
-#        #si no hay errores, actualizamos el evento
-#        evento.title = title
-#        evento.description = description
-#        evento.date_time = date_time
-#        evento.capacity = capacity
-#        evento.image_url = image_url
-#        evento.save()
-#        return JsonResponse({'message': 'Evento actualizado con éxito'})
-#    
-#    return JsonResponse({'error': 'Método no permitido'}, status=405)
-
-
-#listar eventos simple:
-#def lista_eventos(request):
-#    eventos = Event.objects.all.values('id', 'title', 'description', 'date_time', 'capacity', 'image_url', 'organizer_username')
-#    return JsonResponse(list(eventos), safe=False)
-
 
 
 #GESTIÓN DE RESERVAS:
@@ -430,3 +390,147 @@ def login_usuario(request):
         return JsonResponse({'error': f'Falta el parámetro requerido: {str(e)}'}, status=400)
     except json.JSONDecodeError:
         return JsonResponse({'error': 'El cuerpo de la solicitud debe ser JSON válido'}, status=400)
+    
+
+#Vamos a usar APIView para manejar autenticación con tokens.
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, format='password'),
+                'role': openapi.Schema(type=openapi.TYPE_STRING, enum=['organizer', 'participant']),
+                'biography': openapi.Schema(type=openapi.TYPE_STRING)
+            },
+            required=['username', 'password']
+        ),
+        responses={201: "Usuario creado exitosamente", 400: "Error en los datos"}
+    )
+    def post(self, request):
+        data = request.data
+        if User.objects.filter(username=data['username']).exists():
+            return Response({'error': 'El usuario ya existe'}, status=400)
+
+        user = User.objects.create(
+            username=data['username'],
+            password=make_password(data['password']),
+            role=data.get('role', 'participant'),
+            biography=data.get('biography', '')
+        )
+
+        token, created = Token.objects.get_or_create(user=user)
+
+        return Response({'message': 'Usuario registrado con éxito', 'token': token.key}, status=201)
+
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, format='password'),
+            },
+            required=['username', 'password']
+        ),
+        responses={200: "Inicio de sesión exitoso", 401: "Credenciales inválidas"}
+    )
+    def post(self, request):
+        user = authenticate(username=request.data['username'], password=request.data['password'])
+        if not user:
+            return Response({'error': 'Credenciales inválidas'}, status=401)
+
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'message': 'Inicio de sesión exitoso', 'token': token.key})
+    
+
+#Solo los organizadores pueden crear, actualizar y eliminar eventos.
+class ListaEventosAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        eventos = Event.objects.all().values('id', 'title', 'description', 'date_time', 'capacity', 'image_url', 'organizer__username')
+        return Response({'eventos': list(eventos)})
+
+class CrearEventoAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != 'organizer':
+            return Response({'error': 'No tienes permisos para crear eventos'}, status=403)
+
+        data = request.data
+        evento = Event.objects.create(
+            title=data['title'],
+            description=data['description'],
+            date_time=data['date_time'],
+            capacity=data['capacity'],
+            image_url=data.get('image_url', None),
+            organizer=request.user
+        )
+        return Response({'message': 'Evento creado con éxito', 'evento_id': evento.id}, status=201)
+
+class DetalleEventoAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, evento_id):
+        try:
+            evento = Event.objects.get(id=evento_id)
+            return Response({
+                'id': evento.id,
+                'title': evento.title,
+                'description': evento.description,
+                'date_time': evento.date_time,
+                'capacity': evento.capacity,
+                'image_url': evento.image_url,
+                'organizer': evento.organizer.username
+            })
+        except Event.DoesNotExist:
+            return Response({'error': 'Evento no encontrado'}, status=404)
+
+
+
+#Los participantes pueden crear y cancelar sus reservas, pero solo los organizadores pueden modificar estados.
+class CrearReservaAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != 'participant':
+            return Response({'error': 'No tienes permisos para hacer reservas'}, status=403)
+
+        data = request.data
+        try:
+            evento = Event.objects.get(id=data['event_id'])
+        except Event.DoesNotExist:
+            return Response({'error': 'Evento no encontrado'}, status=404)
+
+        reserva = Reservation.objects.create(
+            user=request.user,
+            event=evento,
+            tickets=data['tickets']
+        )
+        return Response({'message': 'Reserva creada con éxito', 'reserva_id': reserva.id}, status=201)
+
+class CancelarReservaAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, reserva_id):
+        try:
+            reserva = Reservation.objects.get(id=reserva_id, user=request.user)
+        except Reservation.DoesNotExist:
+            return Response({'error': 'Reserva no encontrada'}, status=404)
+
+        reserva.delete()
+        return Response({'message': 'Reserva cancelada con éxito'}, status=200)
+
+
